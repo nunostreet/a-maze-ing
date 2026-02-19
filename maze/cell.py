@@ -1,10 +1,10 @@
 # Define a fisica do nosso labirinto
 
 # 0b significa que o número está escrito em binário
-NORTH = 0b0001 # bit 0
-EAST  = 0b0010 # bit 1
-SOUTH = 0b0100 # bit 2
-WEST  = 0b1000 # bit 3
+NORTH = 0b0001  # bit 0
+EAST = 0b0010  # bit 1
+SOUTH = 0b0100  # bit 2
+WEST = 0b1000  # bit 3
 
 # CADA BIT REPRESENTA SE UMA PAREDE ESTÁ FECHADA (1) OU ABERTA (0)
 

@@ -1,4 +1,5 @@
 from .cell import ALL_WALLS
+import random
 
 
 class MazeGenerator:
@@ -9,12 +10,13 @@ class MazeGenerator:
         Store configuration values needed for maze generation.
         Nothing is generated here.
         """
-        self.width = config.width
-        self.height = config.height
-        self.entry = config.entry
-        self.exit = config.exit
-        self.perfect = config.perfect
-        self.seed = config.seed
+        self.width = config["WIDTH"]
+        self.height = config["HEIGHT"]
+        self.entry = config["ENTRY"]
+        self.exit = config["EXIT"]
+        self.perfect = config["PERFECT"]
+        self.seed = config.get("SEED")
+        self._random = random.Random(self.seed)
 
         # Will store the 2D maze structure
         self.grid: list[list[int]] = []
@@ -40,6 +42,32 @@ class MazeGenerator:
             [ALL_WALLS for _ in range(self.width)]
             for _ in range(self.height)
         ]
+
+        # LINK https://medium.com/@nacerkroudir/randomized-depth-first-search-algorithm-for-maze-generation-fb2d83702742
+        # LINK https://www.kaggle.com/code/mexwell/maze-runner-shortest-path-algorithms
+
+        x = 0
+        y = 0
+
+        def in_bounds(x, y) -> bool:
+            return 0 <= x < self.width and 0 <= y < self.height
+
+        # Here we create the set to store all visited cells.
+        # Set will help us avoid getting duplicates
+        visited: set[tuple[int, int]] = set()
+        # We also need to create a stack which will help us check for neighbors.
+        stack: list[tuple[int, int]] = []
+
+        visited.add((x, y))
+        stack.append((x, y))
+
+        while stack:
+            x, y = stack[-1]
+
+            if not in_bounds(x, y) or visited((x,y))
+
+
+
 
     def get_grid(self) -> list[list[int]]:
         """
