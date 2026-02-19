@@ -1,0 +1,1 @@
+def apply_42_pattern(grid) -> list[tuple[int, int]]:
