@@ -16,15 +16,26 @@ class MazeGenerator:
         self.exit = config["EXIT"]
         self.perfect = config["PERFECT"]
         self.seed = config.get("SEED")
-        self._random = random.Random(self.seed)
 
+        # Optional cycle density (only used if PERFECT=False)
+        self.cycle_density = config.get("CYCLE_DENSITY", 0.1)
+
+        if not (0.0 <= self.cycle_density <= 0.3):
+            raise ValueError(
+                "CYCLE_DENSITY must be between 0.0 and 0.3"
+            )
+
+        self._random = random.Random(self.seed)
+        
         # Will store the 2D maze structure
         self.grid: list[list[int]] = []
 
         # Will store the computed shortest path
         self.solution: list[str] = []
 
-    # --------- PUBLIC API --------- #
+    # ================================================
+    # PUBLIC API
+    # ================================================
 
     def generate(self) -> None:
         """Generate the maze structure and compute its solution."""
@@ -33,9 +44,29 @@ class MazeGenerator:
         # Each cell starts with ALL_WALLS (0b1111)
         self._init_grid()
         self._generate_dfs()
+
+        if not self.perfect:
+            self._add_cycles()
         
         # Compute shortest path using BGS
         self.solution = shortest_path(self.grid, self.entry, self.exit)
+
+    def get_grid(self) -> list[list[int]]:
+        """
+        Return the current maze grid.
+        This method does NOT modify the grid.
+        """
+        return self.grid
+
+    def get_solution(self) -> list[str]:
+        """
+        Return the shortest path (if computed).
+        """
+        return self.solution
+    
+    # ================================================
+    # Internal helpers
+    # ================================================
 
     def _init_grid(self) -> None:
         """Initialize grid with all walls closed."""
@@ -87,19 +118,25 @@ class MazeGenerator:
             else:
                 stack.pop()
 
-    def get_grid(self) -> list[list[int]]:
-        """
-        Return the current maze grid.
-        This method does NOT modify the grid.
-        """
-        return self.grid
+    def _add_cycles(self) -> None:
+        """Adds random extra connections to create cycles when PERFECT=False."""
 
-    def get_solution(self) -> list[str]:
-        """
-        Return the shortest path (if computed).
-        """
-        return self.solution
-    
+        for y in range(self.height):
+            for x in range(self.width):
+
+                # Try all possible directions from the current cell
+                for dx, dy, wall, opposite in DIRECTIONS.values():
+                    nx = x + dx
+                    ny = y + dy
+                    if 0 <= nx < self.width and 0 <= ny < self.height:
+                        # Check if this wall is currently closed
+                        # bit != 0 means the wall is present
+                        if self.grid[y][x] & wall != 0:
+                            # With small probability, open this wall
+                            # This creates a cycle in the maze
+                            if self._random.random() < self.cycle_density:
+                                self.grid[y][x] &= ~wall
+                                self.grid[ny][nx] &= ~opposite
 
     # LINK https://medium.com/@nacerkroudir/randomized-depth-first-search-algorithm-for-maze-generation-fb2d83702742
     # LINK https://www.kaggle.com/code/mexwell/maze-runner-shortest-path-algorithms
