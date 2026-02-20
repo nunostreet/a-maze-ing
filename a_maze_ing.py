@@ -1,15 +1,27 @@
 #!/usr/bin/env python3
 import sys
+from maze.generator import MazeGenerator
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        print("Usage: python3 a_maze_ing.py <config_file>")
-        sys.exit(1)
+    config = {
+    "WIDTH": 5,
+    "HEIGHT": 5,
+    "ENTRY": (0, 0),
+    "EXIT": (4, 4),
+    "PERFECT": True,
+    "SEED": 99,
+}
 
-    config_file = sys.argv[1]
-    print(f"Config file received: {config_file}")
-    print("A-Maze-ing started successfully!")
+    generator = MazeGenerator(config)
+    generator.generate()
+
+    print("Grid:")
+    for row in generator.get_grid():
+        print(row)
+
+    print("Solution:")
+    print(generator.get_solution())
 
 
 if __name__ == "__main__":
