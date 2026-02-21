@@ -1,5 +1,7 @@
 from .cell import ALL_WALLS, DIRECTIONS
 from .solver import shortest_path
+from .pattern42 import apply_42_pattern
+import copy
 import random
 
 
@@ -26,7 +28,7 @@ class MazeGenerator:
             )
 
         self._random = random.Random(self.seed)
-        
+
         # Will store the 2D maze structure
         self.grid: list[list[int]] = []
 
@@ -40,16 +42,35 @@ class MazeGenerator:
     def generate(self) -> None:
         """Generate the maze structure and compute its solution."""
 
-        # Create a 2D grid (height rows, width columns)
+        # STEP 1: Create a 2D grid (height rows, width columns)
         # Each cell starts with ALL_WALLS (0b1111)
         self._init_grid()
+
+        # STEP 2: Generate perfect maze
         self._generate_dfs()
 
+        # STEP 3: Add cycles if requested
         if not self.perfect:
             self._add_cycles()
-        
-        # Compute shortest path using BGS
-        self.solution = shortest_path(self.grid, self.entry, self.exit)
+
+        # STEP 4: Try to apply the 42 pattern safely
+        original_grid = copy.deepcopy(self.grid)
+
+        apply_42_pattern(self.grid)
+
+        # STEP 5: Compute shortest path using BGS
+        solution = shortest_path(self.grid, self.entry, self.exit)
+
+        # STEP 6: If 42 broke connectivity, revert
+        if not solution and self.entry != self.exit:
+            self.grid = original_grid
+            self.solution = shortest_path(
+                self.grid,
+                self.entry,
+                self.exit
+            )
+        else:
+            self.solution = solution
 
     def get_grid(self) -> list[list[int]]:
         """
@@ -63,7 +84,7 @@ class MazeGenerator:
         Return the shortest path (if computed).
         """
         return self.solution
-    
+
     # ================================================
     # Internal helpers
     # ================================================
@@ -80,13 +101,13 @@ class MazeGenerator:
 
         def in_bounds(x: int, y: int) -> bool:
             return 0 <= x < self.width and 0 <= y < self.height
-        
+
         x, y = 0, 0
 
         # Here we create the set to store all visited cells
         # Set will help us avoid getting duplicates
         visited: set[tuple[int, int]] = {(x, y)}
-        # We also need to create a stack which will help us check for neighbors.
+        # We also need to create a stack to help check for neighbors.
         stack: list[tuple[int, int]] = [(x, y)]
 
         # While we have cells in the current path
@@ -119,7 +140,7 @@ class MazeGenerator:
                 stack.pop()
 
     def _add_cycles(self) -> None:
-        """Adds random extra connections to create cycles when PERFECT=False."""
+        """Adds random extra connections to create cycles if PERFECT=False."""
 
         for y in range(self.height):
             for x in range(self.width):
