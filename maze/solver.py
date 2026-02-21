@@ -11,6 +11,7 @@ DIR_MAP = {
     (-1, 0): "W",
 }
 
+
 def shortest_path(grid, start, end) -> list[str]:
     """
     Compute the shortest path between start and end positions
@@ -27,7 +28,7 @@ def shortest_path(grid, start, end) -> list[str]:
         the shortest path from start to end.
         Returns an empty list if start == end or no path exists.
     """
-    
+
     # If start and end are the same, no movement is required.
     if start == end:
         return []
@@ -36,7 +37,7 @@ def shortest_path(grid, start, end) -> list[str]:
     queue = deque([start])
     visited = {start}
     parent = {}
-    
+
     height = len(grid)
     width = len(grid[0])
 
