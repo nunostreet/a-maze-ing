@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-import sys
 from maze.generator import MazeGenerator
 
 
 def main() -> None:
     config = {
-    "WIDTH": 5,
-    "HEIGHT": 5,
-    "ENTRY": (0, 0),
-    "EXIT": (4, 4),
-    "PERFECT": True,
-    "SEED": 99,
-}
+        "WIDTH": 5,
+        "HEIGHT": 5,
+        "ENTRY": (0, 0),
+        "EXIT": (4, 4),
+        "PERFECT": True,
+        "SEED": 99,
+    }
 
     generator = MazeGenerator(config)
     generator.generate()
