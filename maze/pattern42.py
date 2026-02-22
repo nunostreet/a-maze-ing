@@ -1,8 +1,8 @@
 from .cell import ALL_WALLS, DIRECTIONS
-from .types import Grid
+from .types import Grid, PatternCells
 
 
-def apply_42_pattern(grid: Grid) -> None:
+def apply_42_pattern(grid: Grid) -> PatternCells:
     """Apply a scalable, centered '42' pattern to the maze grid."""
 
     height = len(grid)
@@ -13,7 +13,7 @@ def apply_42_pattern(grid: Grid) -> None:
 
     # Ensure minimum structural height
     if digit_height < 5:
-        return
+        return set()
 
     # Determine scaled digit width (with structural minimum)
     digit_width = max(3, digit_height // 2)
@@ -22,14 +22,14 @@ def apply_42_pattern(grid: Grid) -> None:
 
     # Ensure it fits with at least 1-cell margin on each side
     if total_width > width - 2:
-        return
+        return set()
 
     # Compute centered position
     start_y = (height - digit_height) // 2
     start_x = (width - total_width) // 2
 
     # Collect pattern cells
-    pattern_cells: set[tuple[int, int]] = set()
+    pattern_cells: PatternCells = set()
 
     _number_4(
         pattern_cells,
@@ -54,6 +54,8 @@ def apply_42_pattern(grid: Grid) -> None:
 
             if 0 <= nx < width and 0 <= ny < height:
                 grid[ny][nx] |= opposite
+
+    return pattern_cells
 
 
 def _number_4(

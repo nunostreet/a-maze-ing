@@ -3,6 +3,7 @@ from .solver import shortest_path
 from .pattern42 import apply_42_pattern
 from .algorithms.dfs import DFSAlgorithm
 from .algorithms.prim import PrimAlgorithm
+from .types import PatternCells
 import copy
 import random
 
@@ -31,6 +32,7 @@ class MazeGenerator:
 
         # Will store the computed shortest path
         self.solution: list[str] = []
+        self.pattern_cells: PatternCells = set()
 
         algo_name = config.get("ALGORITHM", "DFS")
 
@@ -70,7 +72,7 @@ class MazeGenerator:
         # STEP 4: Try to apply the 42 pattern safely
         original_grid = copy.deepcopy(self.grid)
 
-        apply_42_pattern(self.grid)
+        self.pattern_cells = apply_42_pattern(self.grid)
 
         # STEP 5: Compute shortest path using BFS
         solution = shortest_path(self.grid, self.entry, self.exit)
@@ -78,6 +80,7 @@ class MazeGenerator:
         # STEP 6: If 42 broke connectivity, revert
         if not solution and self.entry != self.exit:
             self.grid = original_grid
+            self.pattern_cells = set()
             self.solution = shortest_path(
                 self.grid,
                 self.entry,
@@ -98,6 +101,10 @@ class MazeGenerator:
         Return the shortest path (if computed).
         """
         return list(self.solution)
+
+    def get_pattern_cells(self) -> PatternCells:
+        """Return cells belonging to the rendered 42 pattern."""
+        return set(self.pattern_cells)
 
     # ================================================
     # Internal helpers
