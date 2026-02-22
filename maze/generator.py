@@ -1,6 +1,8 @@
 from .cell import ALL_WALLS, DIRECTIONS
 from .solver import shortest_path
 from .pattern42 import apply_42_pattern
+from .algorithms.dfs import DFSAlgorithm
+from .algorithms.prim import PrimAlgorithm
 import copy
 import random
 
@@ -22,11 +24,6 @@ class MazeGenerator:
         # Optional cycle density (only used if PERFECT=False)
         self.cycle_density = config.get("CYCLE_DENSITY", 0.1)
 
-        if not (0.0 <= self.cycle_density <= 0.3):
-            raise ValueError(
-                "CYCLE_DENSITY must be between 0.0 and 0.3"
-            )
-
         self._random = random.Random(self.seed)
 
         # Will store the 2D maze structure
@@ -34,6 +31,18 @@ class MazeGenerator:
 
         # Will store the computed shortest path
         self.solution: list[str] = []
+
+        algo_name = config.get("ALGORITHM", "DFS")
+
+        algorithms = {
+            "DFS": DFSAlgorithm,
+            "PRIM": PrimAlgorithm
+        }
+
+        if algo_name not in algorithms:
+            raise ValueError(f"Unknown algorithm: {algo_name}")
+
+        self.algorithm = algorithms[algo_name]()
 
     # ================================================
     # PUBLIC API
@@ -47,7 +56,12 @@ class MazeGenerator:
         self._init_grid()
 
         # STEP 2: Generate perfect maze
-        self._generate_dfs()
+        self.algorithm.generate(
+            self.grid,
+            self.width,
+            self.height,
+            self._random
+        )
 
         # STEP 3: Add cycles if requested
         if not self.perfect:
@@ -95,49 +109,6 @@ class MazeGenerator:
             [ALL_WALLS for _ in range(self.width)]
             for _ in range(self.height)
         ]
-
-    def _generate_dfs(self) -> None:
-        """Generate a perfect maze using DFS (recursive backtracker)."""
-
-        def in_bounds(x: int, y: int) -> bool:
-            return 0 <= x < self.width and 0 <= y < self.height
-
-        x, y = 0, 0
-
-        # Here we create the set to store all visited cells
-        # Set will help us avoid getting duplicates
-        visited: set[tuple[int, int]] = {(x, y)}
-        # We also need to create a stack to help check for neighbors.
-        stack: list[tuple[int, int]] = [(x, y)]
-
-        # While we have cells in the current path
-        while stack:
-            # This is our starting point to create the maze
-            x, y = stack[-1]
-            neighbors = []
-
-            # For each entry in the dictionary, get the associate values
-            for dx, dy, wall, opposite in DIRECTIONS.values():
-                nx = x + dx
-                ny = y + dy
-
-                # We test all valid directions and store in neighbors
-                if in_bounds(nx, ny) and (nx, ny) not in visited:
-                    neighbors.append((nx, ny, wall, opposite))
-
-            if neighbors:
-                # We choose one of the random cells in neigbhors
-                nx, ny, wall, opposite = self._random.choice(neighbors)
-
-                self.grid[y][x] &= ~wall
-                self.grid[ny][nx] &= ~opposite
-
-                visited.add((nx, ny))
-                stack.append((nx, ny))
-
-            # Cell only leaves stack if no neighbors left
-            else:
-                stack.pop()
 
     def _add_cycles(self) -> None:
         """Adds random extra connections to create cycles if PERFECT=False."""
