@@ -4,12 +4,12 @@ from maze.generator import MazeGenerator
 
 def main() -> None:
     config = {
-        "WIDTH": 5,
-        "HEIGHT": 5,
-        "ENTRY": (0, 0),
-        "EXIT": (4, 4),
+        "WIDTH": 15,
+        "HEIGHT": 15,
+        "ENTRY": (1, 1),
+        "EXIT": (13, 13),
         "PERFECT": True,
-        "SEED": 99,
+        "SEED": 1,
     }
 
     generator = MazeGenerator(config)
