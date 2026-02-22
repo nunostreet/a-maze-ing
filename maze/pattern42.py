@@ -1,4 +1,4 @@
-from .cell import ALL_WALLS
+from .cell import ALL_WALLS, DIRECTIONS
 
 
 def apply_42_pattern(grid: list[list[int]]) -> None:
@@ -28,7 +28,7 @@ def apply_42_pattern(grid: list[list[int]]) -> None:
     start_x = (width - total_width) // 2
 
     # Collect pattern cells
-    pattern_cells: set = set()
+    pattern_cells: set[tuple[int, int]] = set()
 
     _number_4(
         pattern_cells,
@@ -46,6 +46,13 @@ def apply_42_pattern(grid: list[list[int]]) -> None:
 
     for x, y in pattern_cells:
         grid[y][x] = ALL_WALLS
+
+        for dx, dy, wall, opposite in DIRECTIONS.values():
+            nx = x + dx
+            ny = y + dy
+
+            if 0 <= nx < width and 0 <= ny < height:
+                grid[ny][nx] |= opposite
 
 
 def _number_4(cells, x0, y0, w, h):

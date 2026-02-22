@@ -58,7 +58,7 @@ class MazeGenerator:
 
         apply_42_pattern(self.grid)
 
-        # STEP 5: Compute shortest path using BGS
+        # STEP 5: Compute shortest path using BFS
         solution = shortest_path(self.grid, self.entry, self.exit)
 
         # STEP 6: If 42 broke connectivity, revert
@@ -77,13 +77,13 @@ class MazeGenerator:
         Return the current maze grid.
         This method does NOT modify the grid.
         """
-        return self.grid
+        return [row[:] for row in self.grid]
 
     def get_solution(self) -> list[str]:
         """
         Return the shortest path (if computed).
         """
-        return self.solution
+        return list(self.solution)
 
     # ================================================
     # Internal helpers
@@ -146,18 +146,13 @@ class MazeGenerator:
             for x in range(self.width):
 
                 # Try all possible directions from the current cell
-                for dx, dy, wall, opposite in DIRECTIONS.values():
+                for direction in ("E", "S"):
+                    dx, dy, wall, opposite = DIRECTIONS[direction]
+
                     nx = x + dx
                     ny = y + dy
-                    if 0 <= nx < self.width and 0 <= ny < self.height:
-                        # Check if this wall is currently closed
-                        # bit != 0 means the wall is present
-                        if self.grid[y][x] & wall != 0:
-                            # With small probability, open this wall
-                            # This creates a cycle in the maze
-                            if self._random.random() < self.cycle_density:
-                                self.grid[y][x] &= ~wall
-                                self.grid[ny][nx] &= ~opposite
 
-    # LINK https://medium.com/@nacerkroudir/randomized-depth-first-search-algorithm-for-maze-generation-fb2d83702742
-    # LINK https://www.kaggle.com/code/mexwell/maze-runner-shortest-path-algorithms
+                    if 0 <= nx < self.width and 0 <= ny < self.height:
+                        if self._random.random() < self.cycle_density:
+                            self.grid[y][x] &= ~wall
+                            self.grid[ny][nx] &= ~opposite

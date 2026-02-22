@@ -2,16 +2,6 @@ from .cell import DIRECTIONS
 from collections import deque
 
 
-# Mapping from coordinate differences to cardinal directions.
-# Used when reconstructing the path.
-DIR_MAP = {
-    (0, -1): "N",
-    (1, 0): "E",
-    (0, 1): "S",
-    (-1, 0): "W",
-}
-
-
 def shortest_path(grid, start, end) -> list[str]:
     """
     Compute the shortest path between start and end positions
@@ -43,13 +33,11 @@ def shortest_path(grid, start, end) -> list[str]:
 
     # Perform BFS
     while queue:
-        current = queue.popleft()
+        x, y = queue.popleft()
 
         # Stop BFS as soon as we reach the target
-        if current == end:
+        if (x, y) == end:
             break
-
-        x, y = current
 
         # Explore all possible directions
         for dx, dy, wall, opposite in DIRECTIONS.values():
@@ -59,14 +47,14 @@ def shortest_path(grid, start, end) -> list[str]:
             # Check if neighbor is inside maze boundaries
             if 0 <= nx < width and 0 <= ny < height:
 
-                # Check if there is no wall in this direction
+                # Check both sides of the wall
                 # if bit is 0, passage is open
-                if grid[y][x] & wall == 0:
+                if grid[y][x] & wall == 0 and (grid[ny][nx] & opposite) == 0:
 
                     # Visit only unvisited cells
                     if (nx, ny) not in visited:
                         visited.add((nx, ny))
-                        parent[(nx, ny)] = current
+                        parent[(nx, ny)] = (x, y)
                         queue.append((nx, ny))
 
     # If end was never reached
@@ -75,21 +63,23 @@ def shortest_path(grid, start, end) -> list[str]:
 
     # Reconstruct path from end back to start
     current = end
-    directions = []
+    path = []
 
     while current != start:
-        prev = parent[current]
+        px, py = parent[current]
 
         # Compute movement direction
-        dx = current[0] - prev[0]
-        dy = current[1] - prev[1]
+        dx = current[0] - px
+        dy = current[1] - py
 
         # Convert coordinate difference to direction letter
-        directions.append(DIR_MAP[(dx, dy)])
-
-        current = prev
+        for direction, (ddx, ddy, _, _) in DIRECTIONS.items():
+            if (dx, dy) == (ddx, ddy):
+                path.append(direction)
+                break
+        current = (px, py)
 
     # Reverse to obtain path from start to end
-    directions.reverse()
+    path.reverse()
 
-    return directions
+    return path
