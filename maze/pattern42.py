@@ -1,7 +1,8 @@
 from .cell import ALL_WALLS, DIRECTIONS
+from .types import Grid
 
 
-def apply_42_pattern(grid: list[list[int]]) -> None:
+def apply_42_pattern(grid: Grid) -> None:
     """Apply a scalable, centered '42' pattern to the maze grid."""
 
     height = len(grid)
@@ -55,7 +56,14 @@ def apply_42_pattern(grid: list[list[int]]) -> None:
                 grid[ny][nx] |= opposite
 
 
-def _number_4(cells, x0, y0, w, h):
+def _number_4(
+        cells: set[tuple[int, int]],
+        x0: int,
+        y0: int,
+        w: int,
+        h: int
+        ) -> None:
+
     mid = y0 + h // 2
 
     for y in range(y0, y0 + h):
@@ -71,7 +79,14 @@ def _number_4(cells, x0, y0, w, h):
         cells.add((x, mid))
 
 
-def _number_2(cells, x0, y0, w, h):
+def _number_2(
+        cells: set[tuple[int, int]],
+        x0: int,
+        y0: int,
+        w: int,
+        h: int
+        ) -> None:
+
     top = y0
     mid = y0 + h // 2
     bot = y0 + h - 1

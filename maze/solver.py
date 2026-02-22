@@ -1,8 +1,9 @@
-from .cell import DIRECTIONS
 from collections import deque
+from .cell import DIRECTIONS
+from .types import Grid, Coord, Path
 
 
-def shortest_path(grid, start, end) -> list[str]:
+def shortest_path(grid: Grid, start: Coord, end: Coord) -> Path:
     """
     Compute the shortest path between start and end positions
     in a maze using Breadth-First Search (BFS).
