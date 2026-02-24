@@ -24,39 +24,8 @@ def shortest_path(grid: Grid, start: Coord, end: Coord) -> Path:
     if start == end:
         return []
 
-    # BFS initialization
-    queue = deque([start])
-    visited = {start}
-    parent = {}
-
-    height = len(grid)
-    width = len(grid[0])
-
     # Perform BFS
-    while queue:
-        x, y = queue.popleft()
-
-        # Stop BFS as soon as we reach the target
-        if (x, y) == end:
-            break
-
-        # Explore all possible directions
-        for dx, dy, wall, opposite in DIRECTIONS.values():
-            nx = x + dx
-            ny = y + dy
-
-            # Check if neighbor is inside maze boundaries
-            if 0 <= nx < width and 0 <= ny < height:
-
-                # Check both sides of the wall
-                # if bit is 0, passage is open
-                if grid[y][x] & wall == 0 and (grid[ny][nx] & opposite) == 0:
-
-                    # Visit only unvisited cells
-                    if (nx, ny) not in visited:
-                        visited.add((nx, ny))
-                        parent[(nx, ny)] = (x, y)
-                        queue.append((nx, ny))
+    parent, _ = bfs_parents_and_visited(grid, start)
 
     # If end was never reached
     if end not in parent and start != end:
@@ -84,3 +53,47 @@ def shortest_path(grid: Grid, start: Coord, end: Coord) -> Path:
     path.reverse()
 
     return path
+
+
+def bfs_parents_and_visited(
+    grid: Grid,
+    start: Coord,
+    blocked: set[Coord] | None = None
+) -> tuple[dict[Coord, Coord], set[Coord]]:
+    """
+    Generic BFS helper:
+    - returns parent map (child -> parent)
+    - returns visited set from start
+    """
+    if blocked is None:
+        blocked = set()
+
+    if start in blocked:
+        return {}, set()
+
+    height = len(grid)
+    width = len(grid[0])
+
+    queue = deque([start])
+    visited: set[Coord] = {start}
+    parent: dict[Coord, Coord] = {}
+
+    while queue:
+        x, y = queue.popleft()
+
+        for dx, dy, wall, opposite in DIRECTIONS.values():
+            nx, ny = x + dx, y + dy
+
+            if not (0 <= nx < width and 0 <= ny < height):
+                continue
+            if (nx, ny) in blocked:
+                continue
+
+            # passage open on both sides
+            if grid[y][x] & wall == 0 and grid[ny][nx] & opposite == 0:
+                if (nx, ny) not in visited:
+                    visited.add((nx, ny))
+                    parent[(nx, ny)] = (x, y)
+                    queue.append((nx, ny))
+
+    return parent, visited
