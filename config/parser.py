@@ -1,7 +1,17 @@
 import sys
 
+mand_keys = {'HEIGHT',
+             'WIDTH',
+             'ENTRY',
+             'EXIT',
+             'OUTPUT_FILE',
+             'PERFECT',
+             'SEED',
+             }
+exist_keys: set = set()
 
-def Parser() -> dict | None:
+
+def parser() -> dict | None:
     """Parse the configuration file and return a dictionary.
 
     Returns:
@@ -13,20 +23,13 @@ def Parser() -> dict | None:
             raise ValueError("Not enough arguments")
         if len(sys.argv) > 2:
             raise ValueError("Too many arguments")
+        if not (sys.argv[1].endswith('.txt')):
+            raise ValueError("Argument has to be a file")
         else:
             with open(sys.argv[1]) as file:
 
                 lines = file.readlines()
                 dictionary: dict = {}
-                mand_keys = {'HEIGHT',
-                             'WIDTH',
-                             'ENTRY',
-                             'EXIT',
-                             'OUTPUT_FILE',
-                             'PERFECT',
-                             'SEED',
-                             'CYCLE_DENSITY'}
-                exist_keys: set = set()
 
                 for line in lines:
                     words = line.strip()
@@ -133,14 +136,18 @@ def Parser() -> dict | None:
                     dictionary['SEED'] = new_value
 
                     # cycle_density
-                    value = dictionary['CYCLE_DENSITY']
-                    try:
-                        new_value = float(value)
-                    except ValueError:
-                        raise ValueError("CYCLE_DENSITY must be an float")
-                    if not (0.0 <= new_value <= 0.3):
-                        raise ValueError(
-                            "CYCLE_DENSITY must be between 0.0 and 0.3")
+                    if 'CYCLE_DENSITY' in dictionary:
+                        try:
+                            new_value = float(dictionary['CYCLE_DENSITY'])
+                            if not (0.0 <= new_value <= 0.3):
+                                raise ValueError(
+                                    "CYCLE_DENSITY must be between 0.0 and 0.3"
+                                    )
+                            dictionary['CYCLE_DENSITY'] = new_value
+                        except ValueError as e:
+                            if "between" in str(e):
+                                raise e
+                            raise ValueError("CYCLE_DENSITY must be a float")
 
                     return dictionary
                 else:

@@ -1,0 +1,175 @@
+from maze.generator import MazeGenerator
+from config.parser import parser
+from maze.cell import NORTH, EAST, SOUTH, WEST
+from maze.pattern42 import apply_42_pattern
+import os
+from time import sleep
+
+
+def render(grid: list[list[int]],
+           entry: tuple[int, int],
+           exit: tuple[int, int],
+           path: list[str] = None,
+           colors: dict = None) -> None:
+
+    now_coord = (entry[1], entry[0])
+    path_coord = [now_coord]
+
+    forty_coord = apply_42_pattern(grid)
+
+    RESET = "\033[0m"
+
+    # percorrer o path e passar de letras para coordenadas
+    if path:
+        for letter in path:
+            row, column = now_coord
+
+            # para cima
+            if letter == 'N':
+                now_coord = (row - 1, column)
+
+            # para a direita
+            elif letter == 'E':
+                now_coord = (row, column + 1)
+
+            # para a esquerda
+            elif letter == 'W':
+                now_coord = (row, column - 1)
+
+            # para baixo
+            elif letter == 'S':
+                now_coord = (row + 1, column)
+
+            path_coord.append(now_coord)
+
+    for row, rowe in enumerate(grid):
+        top_line = ""
+        mid_line = ""
+        for column, cell in enumerate(rowe):
+
+            # se row e collom forem coordenadas de entrada
+            if (row, column) == (entry[1], entry[0]):
+                cell_bg = colors['entry_bg']
+
+            # se row e collom forem coordenadas de saida
+            elif (row, column) == (exit[1], exit[0]):
+                cell_bg = colors['exit_bg']
+
+            # se row e collom estiverem no caminho de path
+            elif path_coord and (row, column) in path_coord:
+                cell_bg = colors['path']
+
+            # se collom e row estiverem nas coordenadas de pattern 42
+            elif (column, row) in forty_coord:
+                cell_bg = colors['pattern42']
+
+            else:
+                cell_bg = RESET
+
+            # TOP LINE: Canto + Parede Norte (Sempre 2 + 2 espaços)
+            top_line += f"{colors['wall']}  {RESET}"
+            if cell & NORTH:
+                top_line += f"{colors['wall']}  {RESET}"
+            else:
+                # Caminho vertical
+                is_path = path_coord and (row, column) in path_coord and (row - 1, column) in path_coord
+                top_line += f"{colors['path']}  {RESET}" if is_path else "  "
+
+            # MID LINE: Parede Oeste + Corpo (Sempre 2 + 2 espaços)
+            if cell & WEST:
+                mid_line += f"{colors['wall']}  {RESET}"
+            else:
+                # Caminho horizontal
+                is_path = path_coord and (row, column) in path_coord and (row, column - 1) in path_coord
+                mid_line += f"{colors['path']}  {RESET}" if is_path else "  "
+
+            mid_line += f"{cell_bg}  {RESET}"
+
+        # Paredes externas direitas
+        top_line += f"{colors['wall']}  {RESET}"
+        mid_line += f"{colors['wall']}  {RESET}"
+        print(top_line)
+        print(mid_line)
+
+    # 3. BOTTOM LINE: Fecho do labirinto
+    bottom_line = ""
+    for cell in grid[-1]:
+        bottom_line += f"{colors['wall']}  {RESET}"
+        if cell & SOUTH:
+            bottom_line += f"{colors['wall']}  {RESET}"
+        else:
+            bottom_line += "  "
+    # canto direito inferior
+    bottom_line += f"{colors['wall']}  {RESET}"
+    print(bottom_line)
+
+
+def animate_path(grid: list[list[int]],
+                 entry: tuple[int, int],
+                 exit: tuple[int, int],
+                 path: list[str],
+                 colors: dict) -> None:
+    for i in range(1, len(path)):
+        os.system('clear')
+        render(grid, entry, exit, path[:i], colors)
+        sleep(0.05)
+
+
+# menu
+def menu(generator: MazeGenerator, config: parser) -> None:
+    show_path = False
+    theme_index = 0
+
+    themes = [
+        {
+            'wall': '\033[47m',      # Fundo Branco (visível!)
+            'path': '\033[44m',      # Fundo Azul
+            'entry_bg': '\033[41m',  # Fundo Vermelho
+            'exit_bg': '\033[42m',
+            'pattern42': '\033[45m'    # Fundo Verde
+        },
+        {
+            'wall': '\033[43m',      # Fundo Amarelo
+            'path': '\033[45m',      # Fundo Roxo
+            'entry_bg': '\033[41m',
+            'exit_bg': '\033[42m',
+            'pattern42': '\033[45m'
+        },
+        {
+            'wall': '\033[46m',      # Fundo Ciano
+            'path': '\033[43m',      # Fundo Amarelo
+            'entry_bg': '\033[41m',
+            'exit_bg': '\033[42m',
+            'pattern42': '\033[45m'
+        },
+    ]
+
+    while True:
+        os.system('clear')
+
+        grid = generator.get_grid()
+        path = generator.get_solution() if show_path else None
+        render(grid, config['ENTRY'], config['EXIT'], path, themes[theme_index])
+
+        print("=== A-Maze-ing ===")
+        print("1. Re-generate a new maze")
+        print("2. Show/Hide path from entry exit")
+        print("3. Rotate maze colors")
+        print("4. Quit")
+
+        choice = input("Choice? (1-4):")
+
+        if choice == '1':
+            show_path = False
+            generator.generate()
+        elif choice == '2':
+            show_path = not show_path
+            if show_path:
+                path = generator.get_solution()
+                animate_path(grid, config['ENTRY'], config['EXIT'], path, themes[theme_index])
+        elif choice == '3':
+            theme_index = (theme_index + 1) % len(themes)
+        elif choice == '4':
+            break
+        else:
+            print("Invalid Choice")
