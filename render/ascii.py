@@ -145,25 +145,25 @@ def menu(generator: MazeGenerator, config: parser) -> None:
 
     themes = [
         {
-            'wall': '\033[47m',      # Fundo Branco (visível!)
-            'path': '\033[44m',      # Fundo Azul
-            'entry_bg': '\033[41m',  # Fundo Vermelho
-            'exit_bg': '\033[42m',
-            'pattern42': '\033[45m'  # Fundo Verde
+            'wall': '\033[47m',      # Paredes Brancas
+            'path': '\033[44m',      # Path Azul
+            'entry_bg': '\033[41m',  # Entry Vermelho
+            'exit_bg': '\033[42m',   # Exit Verde
+            'pattern42': '\033[45m'  # 42 pattern rosa
         },
         {
-            'wall': '\033[43m',      # Fundo Amarelo
-            'path': '\033[45m',      # Fundo Roxo
-            'entry_bg': '\033[41m',
-            'exit_bg': '\033[42m',
-            'pattern42': '\033[45m'
+            'wall': '\033[44m',      # Paredes Azul
+            'path': '\033[46m',      # Path azul claro
+            'entry_bg': '\033[41m',  # Entry Vermelho
+            'exit_bg': '\033[42m',   # Exit Verde
+            'pattern42': '\033[47m'  # 42 pattern branco
         },
         {
-            'wall': '\033[46m',      # Fundo Ciano
-            'path': '\033[43m',      # Fundo Amarelo
-            'entry_bg': '\033[41m',
-            'exit_bg': '\033[42m',
-            'pattern42': '\033[45m'
+            'wall': '\033[46m',      # Paredes azul claro
+            'path': '\033[45m',      # Path Rosa
+            'entry_bg': '\033[41m',  # Entry Vermelho
+            'exit_bg': '\033[42m',   # Exit Verde
+            'pattern42': '\033[41m'  # 42 pattern vermelho
         },
     ]
 
