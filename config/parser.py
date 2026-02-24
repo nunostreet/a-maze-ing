@@ -1,15 +1,5 @@
 import sys
 
-mand_keys = {'HEIGHT',
-             'WIDTH',
-             'ENTRY',
-             'EXIT',
-             'OUTPUT_FILE',
-             'PERFECT',
-             'SEED',
-             }
-exist_keys: set = set()
-
 
 def parser() -> dict | None:
     """Parse the configuration file and return a dictionary.
@@ -18,6 +8,20 @@ def parser() -> dict | None:
         dict: Configuration dictionary with validated values.
         None: If an error occurs.
     """
+    mand_keys = {'HEIGHT',
+                 'WIDTH',
+                 'ENTRY',
+                 'EXIT',
+                 'OUTPUT_FILE',
+                 'PERFECT',
+                 'SEED',
+                 }
+    algorithms = {
+                'DFS',
+                'PRIM'
+            }
+    exist_keys: set = set()
+
     try:
         if len(sys.argv) == 1:
             raise ValueError("Not enough arguments")
@@ -148,6 +152,16 @@ def parser() -> dict | None:
                             if "between" in str(e):
                                 raise e
                             raise ValueError("CYCLE_DENSITY must be a float")
+
+                        # algorithms
+                        if 'ALGORITHMS' in dictionary:
+                            try:
+                                new_value = dictionary['ALGORITHMS']
+                                if new_value not in algorithms:
+                                    raise ValueError(
+                                        f"Unknown algorithm: {new_value}")
+                            except Exception as e:
+                                raise ValueError(e)
 
                     return dictionary
                 else:

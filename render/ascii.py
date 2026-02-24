@@ -1,21 +1,32 @@
+import os
+import random
+from time import sleep
 from maze.generator import MazeGenerator
 from config.parser import parser
-from maze.cell import NORTH, EAST, SOUTH, WEST
-from maze.pattern42 import apply_42_pattern
-import os
-from time import sleep
+from maze.cell import NORTH, SOUTH, WEST
 
 
 def render(grid: list[list[int]],
            entry: tuple[int, int],
            exit: tuple[int, int],
            path: list[str] = None,
-           colors: dict = None) -> None:
+           colors: dict = None,
+           forty_coord: tuple[int, int] = None) -> None:
+    """Render the maze in the terminal using ANSI colors.
 
+        Args:
+            grid: 2D list of integers representing the maze.
+            entry: Entry coordinates (x, y).
+            exit: Exit coordinates (x, y).
+            path: List of directions representing the shortest path.
+            colors: Dictionary of ANSI color codes for rendering.
+        """
+
+    # conversão de (x, y) para (y, x) ou (row, column)
     now_coord = (entry[1], entry[0])
-    path_coord = [now_coord]
 
-    forty_coord = apply_42_pattern(grid)
+    # lista de coordendas N, E, S, W
+    path_coord = [now_coord]
 
     RESET = "\033[0m"
 
@@ -72,7 +83,8 @@ def render(grid: list[list[int]],
                 top_line += f"{colors['wall']}  {RESET}"
             else:
                 # Caminho vertical
-                is_path = path_coord and (row, column) in path_coord and (row - 1, column) in path_coord
+                is_path = (path_coord and (row, column) in path_coord
+                           and (row - 1, column) in path_coord)
                 top_line += f"{colors['path']}  {RESET}" if is_path else "  "
 
             # MID LINE: Parede Oeste + Corpo (Sempre 2 + 2 espaços)
@@ -80,7 +92,8 @@ def render(grid: list[list[int]],
                 mid_line += f"{colors['wall']}  {RESET}"
             else:
                 # Caminho horizontal
-                is_path = path_coord and (row, column) in path_coord and (row, column - 1) in path_coord
+                is_path = (path_coord and (row, column) in path_coord
+                           and (row, column - 1) in path_coord)
                 mid_line += f"{colors['path']}  {RESET}" if is_path else "  "
 
             mid_line += f"{cell_bg}  {RESET}"
@@ -108,17 +121,27 @@ def animate_path(grid: list[list[int]],
                  entry: tuple[int, int],
                  exit: tuple[int, int],
                  path: list[str],
-                 colors: dict) -> None:
+                 colors: dict,
+                 forty_coord: tuple[int, int]) -> None:
+    """Animate the shortest path from entry to exit cell by cell."""
     for i in range(1, len(path)):
         os.system('clear')
-        render(grid, entry, exit, path[:i], colors)
+        # slicing:[start:stop:step] -> path[:i] -> do inicio até i, i vai +
+        render(grid, entry, exit, path[:i], colors, forty_coord)
         sleep(0.05)
 
 
 # menu
 def menu(generator: MazeGenerator, config: parser) -> None:
+    """Display the interactive menu and handle user interactions.
+
+    Args:
+        generator: MazeGenerator instance used to generate and retrieve mazes.
+        config: Parsed configuration dictionary with maze parameters.
+    """
     show_path = False
     theme_index = 0
+    forty_coord = generator.get_pattern_cells()
 
     themes = [
         {
@@ -126,7 +149,7 @@ def menu(generator: MazeGenerator, config: parser) -> None:
             'path': '\033[44m',      # Fundo Azul
             'entry_bg': '\033[41m',  # Fundo Vermelho
             'exit_bg': '\033[42m',
-            'pattern42': '\033[45m'    # Fundo Verde
+            'pattern42': '\033[45m'  # Fundo Verde
         },
         {
             'wall': '\033[43m',      # Fundo Amarelo
@@ -149,7 +172,12 @@ def menu(generator: MazeGenerator, config: parser) -> None:
 
         grid = generator.get_grid()
         path = generator.get_solution() if show_path else None
-        render(grid, config['ENTRY'], config['EXIT'], path, themes[theme_index])
+        render(grid,
+               config['ENTRY'],
+               config['EXIT'],
+               path,
+               themes[theme_index],
+               forty_coord)
 
         print("=== A-Maze-ing ===")
         print("1. Re-generate a new maze")
@@ -160,13 +188,26 @@ def menu(generator: MazeGenerator, config: parser) -> None:
         choice = input("Choice? (1-4):")
 
         if choice == '1':
-            show_path = False
+
+            generator.seed = random.randint(0, 99999)
+            generator._random = random.Random(generator.seed)
             generator.generate()
+            forty_coord = generator.get_pattern_cells()
+            show_path = False
+
         elif choice == '2':
+
             show_path = not show_path
+
             if show_path:
                 path = generator.get_solution()
-                animate_path(grid, config['ENTRY'], config['EXIT'], path, themes[theme_index])
+                animate_path(grid,
+                             config['ENTRY'],
+                             config['EXIT'],
+                             path,
+                             themes[theme_index],
+                             forty_coord)
+
         elif choice == '3':
             theme_index = (theme_index + 1) % len(themes)
         elif choice == '4':
