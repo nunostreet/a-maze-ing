@@ -7,6 +7,7 @@ Coord = tuple[int, int]
 Grid = list[list[int]]
 Move = str
 Path = list[Move]
+PatternCells = set[Coord]
 
 
 class MazeConfig(TypedDict):
