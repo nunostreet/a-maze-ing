@@ -1,7 +1,8 @@
 import sys
+from typing import Any
 
 
-def parser() -> dict | None:
+def parser() -> dict[str, Any] | None:
     """Parse the configuration file and return a dictionary.
 
     Returns:
@@ -33,7 +34,7 @@ def parser() -> dict | None:
             with open(sys.argv[1]) as file:
 
                 lines = file.readlines()
-                dictionary: dict = {}
+                dictionary: dict[str, Any] = {}
 
                 for line in lines:
                     words = line.strip()
@@ -153,15 +154,15 @@ def parser() -> dict | None:
                                 raise e
                             raise ValueError("CYCLE_DENSITY must be a float")
 
-                        # algorithms
-                        if 'ALGORITHMS' in dictionary:
-                            try:
-                                new_value = dictionary['ALGORITHMS']
-                                if new_value not in algorithms:
-                                    raise ValueError(
-                                        f"Unknown algorithm: {new_value}")
-                            except Exception as e:
-                                raise ValueError(e)
+                    # algorithms
+                    if 'ALGORITHMS' in dictionary:
+                        try:
+                            new_value = dictionary['ALGORITHMS']
+                            if new_value not in algorithms:
+                                raise ValueError(
+                                    f"Unknown algorithm: {new_value}")
+                        except Exception as e:
+                            raise ValueError(e)
 
                     return dictionary
                 else:
@@ -171,3 +172,4 @@ def parser() -> dict | None:
         print("File not found")
     except Exception as e:
         print(e)
+    return None
