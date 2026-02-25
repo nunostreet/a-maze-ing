@@ -65,6 +65,23 @@ def _number_4(
         w: int,
         h: int
         ) -> None:
+    """
+    Carve the digit '4' into the maze.
+
+    :param cells: Variable to store closed cells
+    :type cells: set[tuple[int, int]]
+    :param x0: Starting column
+    :type x0: int
+    :param y0: Starting row
+    :type y0: int
+    :param w: Number width
+    :type w: int
+    :param h: Number height
+    :type h: int
+
+    Returns:
+        Updated set of cells that belong to the '4' pattern.
+    """
 
     mid = y0 + h // 2
 
@@ -88,6 +105,23 @@ def _number_2(
         w: int,
         h: int
         ) -> None:
+    """
+    Carve the digit '2' into the maze.
+
+    :param cells: Variable to store closed cells
+    :type cells: set[tuple[int, int]]
+    :param x0: Starting column
+    :type x0: int
+    :param y0: Starting row
+    :type y0: int
+    :param w: Number width
+    :type w: int
+    :param h: Number height
+    :type h: int
+
+    Returns:
+        Updated set of cells that belong to the '2' pattern.
+    """
 
     top = y0
     mid = y0 + h // 2

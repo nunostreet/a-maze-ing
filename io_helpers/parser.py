@@ -21,7 +21,7 @@ def parser() -> dict[str, Any] | None:
                 'DFS',
                 'PRIM'
             }
-    exist_keys: set = set()
+    exist_keys: set[str] = set()
 
     try:
         if len(sys.argv) == 1:
@@ -57,22 +57,22 @@ def parser() -> dict[str, Any] | None:
                     # height
                     value = dictionary['HEIGHT']
                     try:
-                        new_value = int(value)
+                        height = int(value)
                     except ValueError:
                         raise ValueError("HEIGHT must be an integer")
-                    if new_value <= 0:
+                    if height <= 0:
                         raise ValueError("HEIGHT must be a positive integer")
-                    dictionary['HEIGHT'] = new_value
+                    dictionary['HEIGHT'] = height
 
                     # width
                     value = dictionary['WIDTH']
                     try:
-                        new_value = int(value)
+                        width = int(value)
                     except ValueError:
                         raise ValueError("WIDTH must be an integer")
-                    if new_value <= 0:
+                    if width <= 0:
                         raise ValueError("WIDTH must be a positive integer")
-                    dictionary['WIDTH'] = new_value
+                    dictionary['WIDTH'] = width
 
                     # entry
                     value = dictionary['ENTRY']
@@ -135,32 +135,32 @@ def parser() -> dict[str, Any] | None:
                     # seed
                     value = dictionary['SEED']
                     try:
-                        new_value = int(value)
+                        seed = int(value)
                     except ValueError:
                         raise ValueError("SEED must be an integer")
-                    dictionary['SEED'] = new_value
+                    dictionary['SEED'] = seed
 
                     # cycle_density
                     if 'CYCLE_DENSITY' in dictionary:
                         try:
-                            new_value = float(dictionary['CYCLE_DENSITY'])
-                            if not (0.0 <= new_value <= 0.3):
+                            cyc_density = float(dictionary['CYCLE_DENSITY'])
+                            if not (0.0 <= cyc_density <= 0.3):
                                 raise ValueError(
                                     "CYCLE_DENSITY must be between 0.0 and 0.3"
                                     )
-                            dictionary['CYCLE_DENSITY'] = new_value
+                            dictionary['CYCLE_DENSITY'] = cyc_density
                         except ValueError as e:
                             if "between" in str(e):
                                 raise e
                             raise ValueError("CYCLE_DENSITY must be a float")
 
                     # algorithms
-                    if 'ALGORITHMS' in dictionary:
+                    if 'ALGORITHM' in dictionary:
                         try:
-                            new_value = dictionary['ALGORITHMS']
-                            if new_value not in algorithms:
+                            algo = dictionary['ALGORITHM'].strip().upper()
+                            if algo not in algorithms:
                                 raise ValueError(
-                                    f"Unknown algorithm: {new_value}")
+                                    f"Unknown algorithm: {algo}")
                         except Exception as e:
                             raise ValueError(e)
 

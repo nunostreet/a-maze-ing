@@ -5,9 +5,14 @@ from ..types import Grid, RNG
 
 class DFSAlgorithm(MazeAlgorithm):
     def generate(self, grid: Grid, width: int, height: int, rng: RNG) -> None:
-        """Generate a perfect maze using DFS (recursive backtracker)."""
+        """
+        Generate a perfect maze using DFS (recursive backtracker).
+        """
 
         def in_bounds(x: int, y: int) -> bool:
+            """
+            Return whether (x, y) is inside maze bounds.
+            """
             return 0 <= x < width and 0 <= y < height
 
         x, y = 0, 0

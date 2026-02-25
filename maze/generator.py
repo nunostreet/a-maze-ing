@@ -1,16 +1,17 @@
+import random
+from typing import Any
 from .cell import ALL_WALLS, DIRECTIONS
 from .solver import shortest_path, bfs_parents_and_visited
 from .pattern42 import apply_42_pattern
 from .algorithms.dfs import DFSAlgorithm
 from .algorithms.prim import PrimAlgorithm
 from .types import PatternCells, Coord
-import random
 
 
 class MazeGenerator:
     """Class responsible for generating and storing a maze."""
 
-    def __init__(self, config) -> None:
+    def __init__(self, config: dict[str, Any]) -> None:
         """
         Store configuration values needed for maze generation.
         """
@@ -32,6 +33,9 @@ class MazeGenerator:
         self.solution: list[str] = []
         self.pattern_cells: PatternCells = set()
 
+        # Storing warnings
+        self.pattern_warning: str | None = None
+
         algo_name = config.get("ALGORITHM", "DFS")
 
         algorithms = {
@@ -49,9 +53,17 @@ class MazeGenerator:
     # ================================================
 
     def generate(self) -> None:
-        """Generate the maze structure and compute its solution."""
+        """
+        Generate the maze structure and compute its solution.
+        """
 
         allow_pattern = self._can_fit_42_pattern()
+        use_pattern = allow_pattern
+
+        self.pattern_warning = None
+
+        if not allow_pattern:
+            self.pattern_warning = "42 pattern omitted: maze too small."
 
         for attempt in range(self.max_attempts):
             rng = self._rng_for_attempt(attempt)
@@ -73,11 +85,19 @@ class MazeGenerator:
                 self._add_cycles_with_rng(rng)
 
             # STEP 4: Apply the 42 pattern on top
-            # (only if maze is large enough)
-            if allow_pattern:
-                self.pattern_cells = apply_42_pattern(self.grid)
-                if not self.pattern_cells:
-                    continue
+            if use_pattern:
+                candidate_pattern = apply_42_pattern(self.grid)
+                if not candidate_pattern:
+                    self.pattern_cells = set()
+                    use_pattern = False
+                elif (
+                    self.entry in candidate_pattern
+                        or self.exit in candidate_pattern
+                        ):
+                    self.pattern_warning = "42 pattern omitted: " \
+                        "ENTRY/EXIT overlaps the pattern"
+                else:
+                    self.pattern_cells = candidate_pattern
             else:
                 self.pattern_cells = set()
 
@@ -101,7 +121,7 @@ class MazeGenerator:
                 return
 
         # Raise error if max attemps were reached
-        raise RuntimeError("Could not generate a valid maze with 42 pattern")
+        raise RuntimeError("Could not generate a valid maze.")
 
     def get_grid(self) -> list[list[int]]:
         """
@@ -136,6 +156,14 @@ class MazeGenerator:
     # ===========================
 
     def _rng_for_attempt(self, attempt: int) -> random.Random:
+        """Build a random generator for the current attempt.
+
+        Args:
+            attempt: Zero-based retry number.
+
+        Returns:
+            A deterministic RNG when SEED is set, otherwise a fresh RNG.
+        """
         # Deterministic retries when seed exists
         if self.seed is not None:
             return random.Random(self.seed + attempt)
@@ -147,7 +175,9 @@ class MazeGenerator:
     # ===========================
 
     def _add_cycles_with_rng(self, rng: random.Random) -> None:
-        """Adds random extra connections to create cycles if PERFECT=False."""
+        """
+        Adds random extra connections to create cycles if PERFECT=False.
+        """
 
         for y in range(self.height):
             for x in range(self.width):
@@ -169,21 +199,25 @@ class MazeGenerator:
     # ===========================
 
     def _can_fit_42_pattern(self) -> bool:
-        """Return True if maze dimensions can support the 42 pattern."""
+        """
+        Return True if maze dimensions can support the 42 pattern.
+        """
         digit_height = self.height // 3
         if digit_height < 5:
             return False
 
         digit_width = max(3, digit_height // 2)
         total_width = digit_width * 2 + 2
-        return total_width <= self.width - 2
+        return bool(total_width <= self.width - 2)
 
     # ===========================
     # Helper para STEP 5
     # ===========================
 
     def _ensure_only_pattern_cells_are_fully_blocked(self) -> None:
-        """Ensure no non-pattern cell remains fully blocked."""
+        """
+        Ensure no non-pattern cell remains fully blocked.
+        """
         for y in range(self.height):
             for x in range(self.width):
                 # Skip if cell is in pattern cells
@@ -209,7 +243,9 @@ class MazeGenerator:
                     break
 
     def _only_pattern_cells_fully_blocked(self) -> bool:
-        """Return True iff only pattern cells are fully blocked (ALL_WALLS)."""
+        """
+        Return True iff only pattern cells are fully blocked (ALL_WALLS).
+        """
         for y in range(self.height):
             for x in range(self.width):
                 if (
@@ -225,7 +261,9 @@ class MazeGenerator:
     # ===========================
 
     def _check_valid_cells(self) -> set[Coord]:
-        """Cells that are allowed to be traversed (except pattern)."""
+        """
+        Cells that are allowed to be traversed (except pattern).
+        """
         return {
             (x, y)
             for y in range(self.height)
@@ -234,6 +272,12 @@ class MazeGenerator:
         }
 
     def _check_isolated_cells(self) -> bool:
+        """Check whether all traversable cells are connected.
+
+        Returns:
+            True if every non-pattern cell is reachable from ENTRY,
+            False otherwise.
+        """
         valid_cells = self._check_valid_cells()
         if not valid_cells:
             return True

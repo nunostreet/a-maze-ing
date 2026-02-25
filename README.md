@@ -2,6 +2,21 @@
 
 Projeto de geração e resolução de labirintos em Python.
 
+## Setup rápido (para correção)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+make install
+make lint
+make run
+```
+
+Notas:
+- O ambiente virtual `.venv` não é versionado (está no `.gitignore`).
+- As dependências para lint estão em `requirements.txt`.
+- Para debug interativo: `make debug`.
+
 ## Como funciona (resumo)
 
 1. O `MazeGenerator` cria uma grelha com todas as paredes fechadas.
