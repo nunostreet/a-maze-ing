@@ -5,9 +5,14 @@ from ..types import Grid, RNG
 
 class PrimAlgorithm(MazeAlgorithm):
     def generate(self, grid: Grid, width: int, height: int, rng: RNG) -> None:
-        """Generate maze using randomized Prim's algorithm."""
+        """
+        Generate maze using randomized Prim's algorithm.
+        """
 
         def in_bounds(x: int, y: int) -> bool:
+            """
+            Return whether (x, y) is inside maze bounds.
+            """
             return 0 <= x < width and 0 <= y < height
 
         start = (0, 0)

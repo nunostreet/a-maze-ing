@@ -1,17 +1,18 @@
 import os
 import random
 from time import sleep
+from typing import Any
+from maze.types import PatternCells
 from maze.generator import MazeGenerator
-from config.parser import parser
 from maze.cell import NORTH, SOUTH, WEST
 
 
 def render(grid: list[list[int]],
            entry: tuple[int, int],
            exit: tuple[int, int],
-           path: list[str] = None,
-           colors: dict = None,
-           forty_coord: tuple[int, int] = None) -> None:
+           path: list[str] | None,
+           colors: dict[str, str],
+           forty_coord: PatternCells) -> None:
     """Render the maze in the terminal using ANSI colors.
 
         Args:
@@ -121,8 +122,8 @@ def animate_path(grid: list[list[int]],
                  entry: tuple[int, int],
                  exit: tuple[int, int],
                  path: list[str],
-                 colors: dict,
-                 forty_coord: tuple[int, int]) -> None:
+                 colors: dict[str, str],
+                 forty_coord: PatternCells) -> None:
     """Animate the shortest path from entry to exit cell by cell."""
     for i in range(1, len(path)):
         os.system('clear')
@@ -132,7 +133,7 @@ def animate_path(grid: list[list[int]],
 
 
 # menu
-def menu(generator: MazeGenerator, config: parser) -> None:
+def menu(generator: MazeGenerator, config: dict[str, Any]) -> None:
     """Display the interactive menu and handle user interactions.
 
     Args:
@@ -179,18 +180,23 @@ def menu(generator: MazeGenerator, config: parser) -> None:
                themes[theme_index],
                forty_coord)
 
+        if generator.pattern_warning:
+            print(generator.pattern_warning)
+
         print("=== A-Maze-ing ===")
         print("1. Re-generate a new maze")
         print("2. Show/Hide path from entry exit")
         print("3. Rotate maze colors")
         print("4. Quit")
 
-        choice = input("Choice? (1-4):")
+        try:
+            choice = input("Choice? (1-4):")
+        except EOFError:
+            break
 
         if choice == '1':
 
             generator.seed = random.randint(0, 99999)
-            generator._random = random.Random(generator.seed)
             generator.generate()
             forty_coord = generator.get_pattern_cells()
             show_path = False
