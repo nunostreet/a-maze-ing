@@ -1,26 +1,18 @@
 #!/usr/bin/env python3
 from maze.generator import MazeGenerator
+from config.parser import parser
+from render.ascii import menu
 
 
 def main() -> None:
-    config = {
-        "WIDTH": 15,
-        "HEIGHT": 15,
-        "ENTRY": (1, 1),
-        "EXIT": (13, 13),
-        "PERFECT": True,
-        "SEED": 1,
-    }
+    config = parser()
 
     generator = MazeGenerator(config)
     generator.generate()
+    generator.get_grid()
 
-    print("Grid:")
-    for row in generator.get_grid():
-        print(row)
-
-    print("Solution:")
-    print(generator.get_solution())
+    generator.get_solution()
+    menu(generator, config)
 
 
 if __name__ == "__main__":
