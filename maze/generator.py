@@ -51,6 +51,8 @@ class MazeGenerator:
     def generate(self) -> None:
         """Generate the maze structure and compute its solution."""
 
+        allow_pattern = self._can_fit_42_pattern()
+
         for attempt in range(self.max_attempts):
             rng = self._rng_for_attempt(attempt)
 
@@ -71,9 +73,13 @@ class MazeGenerator:
                 self._add_cycles_with_rng(rng)
 
             # STEP 4: Apply the 42 pattern on top
-            self.pattern_cells = apply_42_pattern(self.grid)
-            if not self.pattern_cells:
-                continue
+            # (only if maze is large enough)
+            if allow_pattern:
+                self.pattern_cells = apply_42_pattern(self.grid)
+                if not self.pattern_cells:
+                    continue
+            else:
+                self.pattern_cells = set()
 
             # STEP 5: Check no cells were blocked because of 42 pattern
             self._ensure_only_pattern_cells_are_fully_blocked()
@@ -85,9 +91,11 @@ class MazeGenerator:
             if not self._check_isolated_cells():
                 continue
 
-            # ADICIONAR O CHECK 3X3
+            # STEP 7: Ensure there are no forbidden 3x3 open areas
+            if self._has_open_3x3():
+                continue
 
-            # STEP 7: Compute shortest path using BFS and check solution exists
+            # STEP 8: Compute shortest path using BFS and check solution exists
             self.solution = shortest_path(self.grid, self.entry, self.exit)
             if self.solution or self.entry == self.exit:
                 return
@@ -155,6 +163,20 @@ class MazeGenerator:
                         if rng.random() < self.cycle_density:
                             self.grid[y][x] &= ~wall
                             self.grid[ny][nx] &= ~opposite
+
+    # ===========================
+    # Helper para STEP 4
+    # ===========================
+
+    def _can_fit_42_pattern(self) -> bool:
+        """Return True if maze dimensions can support the 42 pattern."""
+        digit_height = self.height // 3
+        if digit_height < 5:
+            return False
+
+        digit_width = max(3, digit_height // 2)
+        total_width = digit_width * 2 + 2
+        return total_width <= self.width - 2
 
     # ===========================
     # Helper para STEP 5
@@ -272,3 +294,67 @@ class MazeGenerator:
                 self.entry,
                 blocked=self.pattern_cells
             )
+
+    # ===========================
+    # Helper para STEP 7
+    # ===========================
+
+    def _is_passage_open(
+        self,
+        x: int,
+        y: int,
+        nx: int,
+        ny: int
+    ) -> bool:
+        """
+        Return True if adjacent cells (x, y) and (nx, ny) are connected.
+        Connection must be open on both sides.
+        """
+        dx = nx - x
+        dy = ny - y
+
+        for ddx, ddy, wall, opposite in DIRECTIONS.values():
+            if (dx, dy) == (ddx, ddy):
+                return (
+                    (self.grid[y][x] & wall) == 0
+                    and (self.grid[ny][nx] & opposite) == 0
+                )
+        return False
+
+    def _is_open_3x3_window(self, x0: int, y0: int) -> bool:
+        """
+        Return True if the 3x3 window starting at (x0, y0) is fully open
+        internally and does not touch pattern cells.
+        """
+        window_cells: set[Coord] = {
+            (x0 + dx, y0 + dy)
+            for dy in range(3)
+            for dx in range(3)
+        }
+
+        if any(cell in self.pattern_cells for cell in window_cells):
+            return False
+
+        # Check 6 horizontal internal adjacencies.
+        for y in range(y0, y0 + 3):
+            for x in range(x0, x0 + 2):
+                if not self._is_passage_open(x, y, x + 1, y):
+                    return False
+
+        # Check 6 vertical internal adjacencies.
+        for x in range(x0, x0 + 3):
+            for y in range(y0, y0 + 2):
+                if not self._is_passage_open(x, y, x, y + 1):
+                    return False
+
+        return True
+
+    def _has_open_3x3(self) -> bool:
+        """
+        Return True if there is at least one forbidden 3x3 open area.
+        """
+        for y0 in range(self.height - 2):
+            for x0 in range(self.width - 2):
+                if self._is_open_3x3_window(x0, y0):
+                    return True
+        return False
