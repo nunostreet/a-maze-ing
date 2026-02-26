@@ -1,7 +1,12 @@
 .DS_Store
 .vscode/
+.idea/
 .mypy_cache
-.maze/__pycache__
+maze/__pycache__
 .venv/
 __pycache__/
 *.pyc
+build/
+dist/
+*.whl
+*.egg-info/
