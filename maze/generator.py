@@ -9,22 +9,77 @@ from .types import PatternCells, Coord
 
 
 class MazeGenerator:
-    """Class responsible for generating and storing a maze."""
+    """Generate mazes and expose grid, path, and pattern artifacts."""
 
-    def __init__(self, config: dict[str, Any]) -> None:
-        """
-        Store configuration values needed for maze generation.
-        """
-        self.width = config["WIDTH"]
-        self.height = config["HEIGHT"]
-        self.entry = config["ENTRY"]
-        self.exit = config["EXIT"]
-        self.perfect = config["PERFECT"]
-        self.seed = config.get("SEED")
-        self.max_attempts = config.get("MAX_ATTEMPTS", 50)
+    def __init__(
+        self,
+        config: dict[str, Any] | None = None,
+        *,
+        width: int | None = None,
+        height: int | None = None,
+        entry: Coord | None = None,
+        exit: Coord | None = None,
+        perfect: bool = True,
+        seed: int | None = None,
+        max_attempts: int = 50,
+        cycle_density: float = 0.1,
+        algorithm: str = "DFS",
+    ) -> None:
+        """Initialize a maze generator.
 
-        # Optional cycle density (only used if PERFECT=False)
-        self.cycle_density = config.get("CYCLE_DENSITY", 0.1)
+        Args:
+            config: Optional legacy configuration map. When provided, values
+                are read from this dictionary.
+            width: Maze width in cells.
+            height: Maze height in cells.
+            entry: Entry coordinate (x, y).
+            exit: Exit coordinate (x, y).
+            perfect: If True, generate a perfect maze (no extra cycles).
+            seed: Optional random seed.
+            max_attempts: Maximum generation retries before failing.
+            cycle_density: Extra cycle probability when perfect is False.
+            algorithm: Generation algorithm name ("DFS" or "PRIM").
+
+        Returns:
+            None.
+        """
+        if config is not None:
+            width = int(config["WIDTH"])
+            height = int(config["HEIGHT"])
+            entry = config["ENTRY"]
+            exit = config["EXIT"]
+            perfect = bool(config["PERFECT"])
+            seed = config.get("SEED")
+            max_attempts = int(config.get("MAX_ATTEMPTS", max_attempts))
+            cycle_density = float(config.get("CYCLE_DENSITY", cycle_density))
+            algorithm = str(config.get("ALGORITHM", algorithm))
+
+        if width is None or height is None or entry is None or exit is None:
+            raise ValueError(
+                "width, height, entry, and exit are required when config is not provided."
+            )
+
+        if width <= 0 or height <= 0:
+            raise ValueError("width and height must be positive integers")
+        if max_attempts <= 0:
+            raise ValueError("max_attempts must be a positive integer")
+        if not (0.0 <= cycle_density <= 1.0):
+            raise ValueError("cycle_density must be between 0.0 and 1.0")
+        if not (0 <= entry[0] < width and 0 <= entry[1] < height):
+            raise ValueError("entry is outside maze bounds")
+        if not (0 <= exit[0] < width and 0 <= exit[1] < height):
+            raise ValueError("exit is outside maze bounds")
+        if entry == exit:
+            raise ValueError("entry and exit must be different coordinates")
+
+        self.width = width
+        self.height = height
+        self.entry = entry
+        self.exit = exit
+        self.perfect = perfect
+        self.seed = seed
+        self.max_attempts = max_attempts
+        self.cycle_density = cycle_density
 
         # Will store the 2D maze structure
         self.grid: list[list[int]] = []
@@ -36,7 +91,7 @@ class MazeGenerator:
         # Storing warnings
         self.pattern_warning: str | None = None
 
-        algo_name = config.get("ALGORITHM", "DFS")
+        algo_name = algorithm.upper()
 
         algorithms = {
             "DFS": DFSAlgorithm,
@@ -53,8 +108,13 @@ class MazeGenerator:
     # ================================================
 
     def generate(self) -> None:
-        """
-        Generate the maze structure and compute its solution.
+        """Build a valid maze grid and compute the shortest solution path.
+
+        Retries generation until all structural constraints are satisfied, or
+        raises an error after the configured attempt limit.
+
+        Returns:
+            None.
         """
 
         allow_pattern = self._can_fit_42_pattern()
@@ -124,20 +184,28 @@ class MazeGenerator:
         raise RuntimeError("Could not generate a valid maze.")
 
     def get_grid(self) -> list[list[int]]:
-        """
-        Return the current maze grid.
-        This method does NOT modify the grid.
+        """Return a defensive copy of the current maze grid.
+
+        Returns:
+            2D list of cell wall bitmasks.
         """
         return [row[:] for row in self.grid]
 
     def get_solution(self) -> list[str]:
-        """
-        Return the shortest path (if computed).
+        """Return a copy of the shortest path from entry to exit.
+
+        Returns:
+            List of move symbols (for example ``"N"``, ``"E"``, ``"S"``,
+            ``"W"``). May be empty when no path is available yet.
         """
         return list(self.solution)
 
     def get_pattern_cells(self) -> PatternCells:
-        """Return cells belonging to the rendered 42 pattern."""
+        """Return a copy of coordinates occupied by the ``42`` pattern.
+
+        Returns:
+            Set of pattern coordinates.
+        """
         return set(self.pattern_cells)
 
     # ================================================
@@ -145,7 +213,11 @@ class MazeGenerator:
     # ================================================
 
     def _init_grid(self) -> None:
-        """Initialize grid with all walls closed."""
+        """Initialize the internal grid with all walls closed.
+
+        Returns:
+            None.
+        """
         self.grid = [
             [ALL_WALLS for _ in range(self.width)]
             for _ in range(self.height)
@@ -175,8 +247,13 @@ class MazeGenerator:
     # ===========================
 
     def _add_cycles_with_rng(self, rng: random.Random) -> None:
-        """
-        Adds random extra connections to create cycles if PERFECT=False.
+        """Add random passages to introduce cycles in non-perfect mazes.
+
+        Args:
+            rng: Random generator used to decide extra openings.
+
+        Returns:
+            None.
         """
 
         for y in range(self.height):
@@ -199,8 +276,10 @@ class MazeGenerator:
     # ===========================
 
     def _can_fit_42_pattern(self) -> bool:
-        """
-        Return True if maze dimensions can support the 42 pattern.
+        """Check whether current dimensions can host the ``42`` pattern.
+
+        Returns:
+            True when the pattern fits with required margins, False otherwise.
         """
         digit_height = self.height // 3
         if digit_height < 5:
@@ -215,8 +294,10 @@ class MazeGenerator:
     # ===========================
 
     def _ensure_only_pattern_cells_are_fully_blocked(self) -> None:
-        """
-        Ensure no non-pattern cell remains fully blocked.
+        """Open any fully blocked non-pattern cell by carving one valid edge.
+
+        Returns:
+            None.
         """
         for y in range(self.height):
             for x in range(self.width):
@@ -243,8 +324,10 @@ class MazeGenerator:
                     break
 
     def _only_pattern_cells_fully_blocked(self) -> bool:
-        """
-        Return True iff only pattern cells are fully blocked (ALL_WALLS).
+        """Validate that only pattern cells remain fully blocked.
+
+        Returns:
+            True when every ``ALL_WALLS`` cell belongs to the pattern.
         """
         for y in range(self.height):
             for x in range(self.width):
@@ -261,8 +344,10 @@ class MazeGenerator:
     # ===========================
 
     def _check_valid_cells(self) -> set[Coord]:
-        """
-        Cells that are allowed to be traversed (except pattern).
+        """Collect traversable coordinates excluding blocked pattern cells.
+
+        Returns:
+            Set of valid coordinates.
         """
         return {
             (x, y)
@@ -294,9 +379,10 @@ class MazeGenerator:
         return visited == valid_cells
 
     def _ensure_no_isolated_blocks(self) -> None:
-        """
-        Connect disconnected valid components to the ENTRY component by
-        opening one wall at a time between adjacent components.
+        """Connect disconnected traversable components to the entry component.
+
+        Returns:
+            None.
         """
         valid_cells = self._check_valid_cells()
         if not valid_cells or self.entry not in valid_cells:
@@ -350,9 +436,16 @@ class MazeGenerator:
         nx: int,
         ny: int
     ) -> bool:
-        """
-        Return True if adjacent cells (x, y) and (nx, ny) are connected.
-        Connection must be open on both sides.
+        """Check whether two adjacent cells are mutually open.
+
+        Args:
+            x: Source cell x coordinate.
+            y: Source cell y coordinate.
+            nx: Neighbor cell x coordinate.
+            ny: Neighbor cell y coordinate.
+
+        Returns:
+            True when passage is open in both cells, False otherwise.
         """
         dx = nx - x
         dy = ny - y
@@ -366,9 +459,15 @@ class MazeGenerator:
         return False
 
     def _is_open_3x3_window(self, x0: int, y0: int) -> bool:
-        """
-        Return True if the 3x3 window starting at (x0, y0) is fully open
-        internally and does not touch pattern cells.
+        """Check if a 3x3 window is fully open and pattern-free.
+
+        Args:
+            x0: Leftmost x coordinate of the window.
+            y0: Top y coordinate of the window.
+
+        Returns:
+            True when all internal adjacencies are open and no cell belongs
+            to the ``42`` pattern.
         """
         window_cells: set[Coord] = {
             (x0 + dx, y0 + dy)
@@ -394,8 +493,10 @@ class MazeGenerator:
         return True
 
     def _has_open_3x3(self) -> bool:
-        """
-        Return True if there is at least one forbidden 3x3 open area.
+        """Detect whether the maze contains a forbidden open 3x3 area.
+
+        Returns:
+            True when at least one invalid 3x3 open area exists.
         """
         for y0 in range(self.height - 2):
             for x0 in range(self.width - 2):

@@ -3,7 +3,15 @@ from .types import Grid, PatternCells
 
 
 def apply_42_pattern(grid: Grid) -> PatternCells:
-    """Apply a scalable, centered '42' pattern to the maze grid."""
+    """Apply a centered scalable ``42`` blocked pattern to a maze grid.
+
+    Args:
+        grid: Mutable maze grid encoded as wall bitmasks.
+
+    Returns:
+        Set of coordinates used by the pattern. Returns an empty set when
+        dimensions are too small for a valid pattern.
+    """
 
     height = len(grid)
     width = len(grid[0])
@@ -65,22 +73,17 @@ def _number_4(
         w: int,
         h: int
         ) -> None:
-    """
-    Carve the digit '4' into the maze.
+    """Add cells that draw the digit ``4`` into the pattern set.
 
-    :param cells: Variable to store closed cells
-    :type cells: set[tuple[int, int]]
-    :param x0: Starting column
-    :type x0: int
-    :param y0: Starting row
-    :type y0: int
-    :param w: Number width
-    :type w: int
-    :param h: Number height
-    :type h: int
+    Args:
+        cells: Mutable set receiving pattern coordinates.
+        x0: Leftmost x coordinate of the digit bounding box.
+        y0: Top y coordinate of the digit bounding box.
+        w: Width of the digit bounding box.
+        h: Height of the digit bounding box.
 
     Returns:
-        Updated set of cells that belong to the '4' pattern.
+        None.
     """
 
     mid = y0 + h // 2
@@ -105,22 +108,17 @@ def _number_2(
         w: int,
         h: int
         ) -> None:
-    """
-    Carve the digit '2' into the maze.
+    """Add cells that draw the digit ``2`` into the pattern set.
 
-    :param cells: Variable to store closed cells
-    :type cells: set[tuple[int, int]]
-    :param x0: Starting column
-    :type x0: int
-    :param y0: Starting row
-    :type y0: int
-    :param w: Number width
-    :type w: int
-    :param h: Number height
-    :type h: int
+    Args:
+        cells: Mutable set receiving pattern coordinates.
+        x0: Leftmost x coordinate of the digit bounding box.
+        y0: Top y coordinate of the digit bounding box.
+        w: Width of the digit bounding box.
+        h: Height of the digit bounding box.
 
     Returns:
-        Updated set of cells that belong to the '2' pattern.
+        None.
     """
 
     top = y0

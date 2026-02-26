@@ -14,7 +14,17 @@ def main() -> int:
         if config is None:
             return 1
 
-        generator = MazeGenerator(config)
+        generator = MazeGenerator(
+            width=config["WIDTH"],
+            height=config["HEIGHT"],
+            entry=config["ENTRY"],
+            exit=config["EXIT"],
+            perfect=config["PERFECT"],
+            seed=config.get("SEED"),
+            cycle_density=config.get("CYCLE_DENSITY", 0.1),
+            algorithm=config.get("ALGORITHM", "DFS"),
+            max_attempts=config.get("MAX_ATTEMPTS", 50),
+        )
         generator.generate()
 
         grid = generator.get_grid()

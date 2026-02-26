@@ -1,17 +1,16 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mazegen"
+name = "mazegen-amazeing"
 version = "1.0.0"
-description = "Maze generator library — generates perfect and imperfect mazes"
+description = "Reusable maze generator with DFS/Prim generation and BFS solution."
 readme = "README.md"
 requires-python = ">=3.10"
+authors = [
+  {name = "Nuno Street, Pedro Vicente"}
+]
 
-[tool.setuptools]
-packages = ["mazegen", "mazegen.algorithms"]
-
-[tool.setuptools.package-dir]
-mazegen = "maze"
-"mazegen.algorithms" = "maze/algorithms"
+[tool.setuptools.packages.find]
+include = ["maze", "maze.*"]

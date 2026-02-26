@@ -1,13 +1,17 @@
 def write_maze(grid: list[list[int]], entry: tuple[int, int],
                exit: tuple[int, int], path: list[str],
                output_file: str) -> None:
-    """Write the maze to a file in hexadecimal format.
+    """Write maze data to a text file in hexadecimal format.
+
     Args:
-        grid: 2D list of integers representing the maze.
-        entry: Entry coordinates (x, y).
-        exit: Exit coordinates (x, y).
-        path: Shortest path from entry to exit.
-        output_file: Output filename.
+        grid: 2D list of cells encoded as wall bitmasks.
+        entry: Entry coordinates ``(x, y)``.
+        exit: Exit coordinates ``(x, y)``.
+        path: Shortest path directions.
+        output_file: Destination filename.
+
+    Returns:
+        None.
     """
     if not grid:
         raise ValueError("Grid cannot be empty")

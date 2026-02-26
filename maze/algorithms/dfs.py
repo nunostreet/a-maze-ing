@@ -4,14 +4,30 @@ from ..types import Grid, RNG
 
 
 class DFSAlgorithm(MazeAlgorithm):
+    """Generate mazes with depth-first search backtracking."""
+
     def generate(self, grid: Grid, width: int, height: int, rng: RNG) -> None:
-        """
-        Generate a perfect maze using DFS (recursive backtracker).
+        """Generate a perfect maze using DFS recursive backtracking.
+
+        Args:
+            grid: Grid of cells encoded as wall bitmasks.
+            width: Maze width in cells.
+            height: Maze height in cells.
+            rng: Random generator used for neighbor selection.
+
+        Returns:
+            None.
         """
 
         def in_bounds(x: int, y: int) -> bool:
-            """
-            Return whether (x, y) is inside maze bounds.
+            """Check whether a coordinate is inside the maze boundaries.
+
+            Args:
+                x: Horizontal coordinate.
+                y: Vertical coordinate.
+
+            Returns:
+                True when the coordinate is valid, False otherwise.
             """
             return 0 <= x < width and 0 <= y < height
 

@@ -21,6 +21,10 @@ def render(grid: list[list[int]],
             exit: Exit coordinates (x, y).
             path: List of directions representing the shortest path.
             colors: Dictionary of ANSI color codes for rendering.
+            forty_coord: Coordinates occupied by the 42 pattern.
+
+        Returns:
+            None.
         """
 
     # conversão de (x, y) para (y, x) ou (row, column)
@@ -124,7 +128,19 @@ def animate_path(grid: list[list[int]],
                  path: list[str],
                  colors: dict[str, str],
                  forty_coord: PatternCells) -> None:
-    """Animate the shortest path from entry to exit cell by cell."""
+    """Animate the shortest path from entry to exit cell by cell.
+
+    Args:
+        grid: 2D list of integers representing the maze.
+        entry: Entry coordinates (x, y).
+        exit: Exit coordinates (x, y).
+        path: Sequence of direction letters for the solution.
+        colors: Dictionary of ANSI color codes for rendering.
+        forty_coord: Coordinates occupied by the 42 pattern.
+
+    Returns:
+        None.
+    """
     for i in range(1, len(path)):
         os.system('clear')
         # slicing:[start:stop:step] -> path[:i] -> do inicio até i, i vai +
@@ -139,6 +155,9 @@ def menu(generator: MazeGenerator, config: dict[str, Any]) -> None:
     Args:
         generator: MazeGenerator instance used to generate and retrieve mazes.
         config: Parsed configuration dictionary with maze parameters.
+
+    Returns:
+        None.
     """
     show_path = False
     theme_index = 0

@@ -11,6 +11,8 @@ PatternCells = set[Coord]
 
 
 class MazeConfig(TypedDict):
+    """Typed structure for validated maze generator configuration."""
+
     WIDTH: int
     HEIGHT: int
     ENTRY: Coord

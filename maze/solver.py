@@ -4,20 +4,16 @@ from .types import Grid, Coord, Path
 
 
 def shortest_path(grid: Grid, start: Coord, end: Coord) -> Path:
-    """
-    Compute the shortest path between start and end positions
-    in a maze using Breadth-First Search (BFS).
+    """Compute the shortest path from ``start`` to ``end`` using BFS.
 
-    Parameters:
-        grid  : 2D list of integers representing the maze.
-                Each cell encodes walls using bit flags.
-        start : tuple[int, int] representing (x, y) entry position.
-        end   : tuple[int, int] representing (x, y) exit position.
+    Args:
+        grid: Maze grid encoded as wall bitmasks.
+        start: Entry coordinate ``(x, y)``.
+        end: Exit coordinate ``(x, y)``.
 
     Returns:
-        A list of directions ["N", "E", "S", "W"] representing
-        the shortest path from start to end.
-        Returns an empty list if start == end or no path exists.
+        List of direction letters from start to end. Returns an empty list
+        when ``start == end`` or when no path exists.
     """
 
     # If start and end are the same, no movement is required.
@@ -60,10 +56,16 @@ def bfs_parents_and_visited(
     start: Coord,
     blocked: set[Coord] | None = None
 ) -> tuple[dict[Coord, Coord], set[Coord]]:
-    """
-    Generic BFS helper:
-    - returns parent map (child -> parent)
-    - returns visited set from start
+    """Run BFS and return both parent links and visited coordinates.
+
+    Args:
+        grid: Maze grid encoded as wall bitmasks.
+        start: Start coordinate ``(x, y)``.
+        blocked: Coordinates that BFS should treat as unavailable.
+
+    Returns:
+        Tuple ``(parent, visited)`` where ``parent`` maps a node to its
+        predecessor and ``visited`` contains all reached coordinates.
     """
     if blocked is None:
         blocked = set()

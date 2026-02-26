@@ -3,11 +3,10 @@ from typing import Any
 
 
 def parser() -> dict[str, Any] | None:
-    """Parse the configuration file and return a dictionary.
+    """Parse and validate the configuration file from CLI argument.
 
     Returns:
-        dict: Configuration dictionary with validated values.
-        None: If an error occurs.
+        Validated configuration dictionary, or ``None`` when parsing fails.
     """
     mand_keys = {'HEIGHT',
                  'WIDTH',
