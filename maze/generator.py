@@ -56,7 +56,7 @@ class MazeGenerator:
 
         if width is None or height is None or entry is None or exit is None:
             raise ValueError(
-                "width, height, entry, and exit are required when config is not provided."
+                "width, height, entry & exit required if config not provided."
             )
 
         if width <= 0 or height <= 0:
