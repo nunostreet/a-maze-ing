@@ -1,9 +1,9 @@
-# A-Maze-ing
+# A-Maze-ing: Maze Generator and Solver
 
 Python maze generator and solver with DFS/Prim generation, BFS shortest-path solving, config-driven output, and interactive ASCII visualization.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="A-Maze-ing demo" width="720" />
+  <img src="assets/demo.gif" alt="A-Maze-ing demo" width="400" />
 </p>
 
 This project was created as part of the 42 curriculum by `nstreet-` and `pedde-al`.
@@ -94,6 +94,15 @@ CYCLE_DENSITY=0.15
 - `render/ascii.py` provides the interactive terminal visualization
 - `a_maze_ing.py` is the CLI entrypoint
 
+## Interactive Controls
+
+When the maze viewer is running, you can use:
+
+- `1` to generate a new maze
+- `2` to show or hide the shortest path
+- `3` to rotate the color theme
+- `4` to quit
+
 ## Reusable API
 
 ```python
@@ -119,7 +128,3 @@ solution = gen.get_solution()
 - The package distribution name is `mazegen-amazeing`
 - The internal grid uses cell wall bitmasks and does not need to match the text export format
 - `MazeGenerator(config_dict)` is still supported for legacy compatibility
-
-## Demo Asset
-
-The repository includes a real terminal demo GIF at `assets/demo.gif`.
