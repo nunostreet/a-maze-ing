@@ -142,22 +142,6 @@ Notes:
 - `nstreet-`: core maze module (`maze/`) including generation logic, algorithms, solver integration, and reusable API behavior.
 - `pedde-al`: configuration parsing, output writing, and terminal visualization/interaction.
 
-### Planning: Expected vs Actual
-- Initial split was defined from the start:
-  - one side focused on maze core/generation;
-  - the other side focused on parsing, output, and visualization.
-- This plan stayed stable until delivery, with minor iteration mostly on interfaces and validation details.
-- Integration was smooth because both sides consistently aligned on what each part should receive and return.
-
-### Retrospective
-- What worked well:
-  - clear ownership boundaries from day one;
-  - continuous alignment on module inputs/outputs;
-  - straightforward final integration between subsystems.
-- What could be improved:
-  - define stricter integration test checkpoints earlier;
-  - lock a final packaging/release checklist sooner.
-
 ### Tools Used
 Current technical tools:
 - Python, Makefile
@@ -175,9 +159,6 @@ Classic references:
 - BFS shortest path examples: https://www.kaggle.com/code/mexwell/maze-runner-shortest-path-algorithms
 - ANSI terminal colors: https://en.wikipedia.org/wiki/ANSI_escape_code
 
-### AI Usage Disclosure
-AI was used as an assistant for:
-- debugging support;
 - docstring quality/tuning;
 - running bulk test ideas and edge-case checks;
 - final code review support;
