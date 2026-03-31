@@ -2,7 +2,9 @@
 
 Python maze generator and solver with DFS/Prim generation, BFS shortest-path solving, config-driven output, and interactive ASCII visualization.
 
-![A-Maze-ing demo](assets/demo.gif)
+<p align="center">
+  <img src="assets/demo.gif" alt="A-Maze-ing demo" width="720" />
+</p>
 
 This project was created as part of the 42 curriculum by `nstreet-` and `pedde-al`.
 
@@ -117,10 +119,6 @@ solution = gen.get_solution()
 - The package distribution name is `mazegen-amazeing`
 - The internal grid uses cell wall bitmasks and does not need to match the text export format
 - `MazeGenerator(config_dict)` is still supported for legacy compatibility
-
-## Suggested GitHub Topics
-
-`python`, `maze`, `maze-generator`, `maze-solver`, `pathfinding`, `dfs`, `prim-algorithm`, `bfs`, `ascii`, `cli`
 
 ## Demo Asset
 
