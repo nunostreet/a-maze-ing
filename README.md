@@ -1,30 +1,30 @@
-*This project has been created as part of the 42 curriculum by nstreet-, pedde-al.*
-
 # A-Maze-ing
 
-## Description
-A-Maze-ing is a Python project that generates and solves mazes.
+Python maze generator and solver with DFS/Prim generation, BFS shortest-path solving, config-driven output, and interactive ASCII visualization.
 
-Project goal:
-- Generate valid mazes from a config file.
-- Guarantee structural constraints (no isolated traversable zones, no forbidden open 3x3 areas, controlled blocked pattern cells).
-- Compute a shortest path from entry to exit.
-- Export the maze to file and provide an ASCII interactive visualization.
+![A-Maze-ing demo](assets/demo.gif)
 
-High-level overview:
-- Core generator: `MazeGenerator` in `maze/generator.py`.
-- Generation algorithms: DFS and randomized Prim (`maze/algorithms/`).
-- Solver: BFS shortest path (`maze/solver.py`).
-- Optional centered scalable `42` blocked pattern (`maze/pattern42.py`).
-- CLI entrypoint: `a_maze_ing.py`.
+This project was created as part of the 42 curriculum by `nstreet-` and `pedde-al`.
 
-## Instructions
+## Features
+
+- Generate valid mazes from a simple config file
+- Solve the shortest path from entry to exit with BFS
+- Choose between DFS and randomized Prim generation
+- Support perfect and non-perfect mazes with configurable cycle density
+- Export the maze to a text file
+- Explore the result in an interactive ASCII viewer with path animation and color themes
+- Reuse the generator as a Python package through `maze.MazeGenerator`
+
+## Quick Start
 
 ### Prerequisites
+
 - Python 3.10+
 - `make`
 
 ### Installation
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -32,6 +32,7 @@ make install
 ```
 
 ### Run
+
 ```bash
 make run
 # or with a custom config path
@@ -39,41 +40,37 @@ make run CONFIG=path/to/config.txt
 ```
 
 ### Lint
+
 ```bash
 make lint
 make lint-strict
 ```
 
-### Build the reusable package (`mazegen-*`)
+### Build the package
+
 ```bash
 make package
 ```
 
-Generated artifacts:
-- Build outputs in `dist/`:
-  - `dist/mazegen_amazeing-1.0.0-py3-none-any.whl`
-  - `dist/mazegen_amazeing-1.0.0.tar.gz`
-- One selected distributable is also copied to repository root for evaluation:
-  - default: `mazegen_amazeing-1.0.0-py3-none-any.whl`
-  - or use tarball: `make package PACKAGE_KIND=tar`
+## Example Config
 
-## Config File Structure (Complete)
-Expected format: one `KEY=VALUE` pair per line, optional comments with `#`.
+Expected format: one `KEY=VALUE` pair per line, with optional `#` comments.
 
 Mandatory keys:
-- `WIDTH=<int>`: maze width (`> 0`)
-- `HEIGHT=<int>`: maze height (`> 0`)
-- `ENTRY=x,y`: entry coordinate inside bounds
-- `EXIT=x,y`: exit coordinate inside bounds and different from `ENTRY`
-- `OUTPUT_FILE=<name>.txt`: output file path/name ending in `.txt`
-- `PERFECT=True|False`: whether to keep a perfect maze (no extra cycles)
-- `SEED=<int>`: deterministic generation seed
+
+- `WIDTH=<int>`
+- `HEIGHT=<int>`
+- `ENTRY=x,y`
+- `EXIT=x,y`
+- `OUTPUT_FILE=<name>.txt`
+- `PERFECT=True|False`
+- `SEED=<int>`
 
 Optional keys:
-- `ALGORITHM=DFS|PRIM` (default `DFS`)
-- `CYCLE_DENSITY=<float>` in `[0.0, 0.3]` (used when `PERFECT=False`)
 
-Example:
+- `ALGORITHM=DFS|PRIM`
+- `CYCLE_DENSITY=<float>` in `[0.0, 0.3]` when `PERFECT=False`
+
 ```txt
 WIDTH=30
 HEIGHT=20
@@ -86,28 +83,17 @@ ALGORITHM=PRIM
 CYCLE_DENSITY=0.15
 ```
 
-## Maze Generation Algorithm Chosen
-Primary chosen algorithm: **DFS (recursive backtracker)**.
+## How It Works
 
-Also implemented as an advanced feature:
-- **Randomized Prim** (`ALGORITHM=PRIM`)
+- `maze/generator.py` contains the main `MazeGenerator` class
+- `maze/algorithms/` includes DFS and randomized Prim implementations
+- `maze/solver.py` computes the shortest path with BFS
+- `maze/pattern42.py` applies the optional centered `42` blocked pattern
+- `render/ascii.py` provides the interactive terminal visualization
+- `a_maze_ing.py` is the CLI entrypoint
 
-## Why This Algorithm
-Why DFS was selected as primary:
-- Simple, reliable, and easy to validate for perfect maze generation.
-- Produces long corridors and clear backtracking behavior.
-- Efficient for the project constraints and straightforward to maintain.
+## Reusable API
 
-Why Prim was added:
-- Provides a second valid topology style.
-- Useful for experimentation and comparison.
-
-## Reusable Code and How
-Reusable module/package:
-- Package: `mazegen-amazeing` (distribution name matching `mazegen-*`).
-- Reusable API entrypoint: `maze.MazeGenerator`.
-
-How to reuse:
 ```python
 from maze import MazeGenerator
 
@@ -119,49 +105,23 @@ gen = MazeGenerator(
     seed=42,
     algorithm="DFS",
 )
+
 gen.generate()
 
-grid = gen.get_grid()          # internal maze structure (bitmask per cell)
-solution = gen.get_solution()  # shortest path as ["N", "E", "S", "W", ...]
+grid = gen.get_grid()
+solution = gen.get_solution()
 ```
 
-Notes:
-- The internal `grid` format is reusable programmatically and does not need to match output-file text format.
-- Legacy compatibility is kept: `MazeGenerator(config_dict)` is still supported.
+## Notes
 
-## Advanced Features Implemented
-- Multiple generation algorithms: DFS and PRIM.
-- Optional cycle injection (`PERFECT=False` with `CYCLE_DENSITY`).
-- Optional centered scalable `42` blocked pattern.
-- Structural post-validation and repair helpers.
-- Interactive ASCII visualization with path animation and theme rotation.
+- The package distribution name is `mazegen-amazeing`
+- The internal grid uses cell wall bitmasks and does not need to match the text export format
+- `MazeGenerator(config_dict)` is still supported for legacy compatibility
 
-## Team and Project Management
+## Suggested GitHub Topics
 
-### Team Roles
-- `nstreet-`: core maze module (`maze/`) including generation logic, algorithms, solver integration, and reusable API behavior.
-- `pedde-al`: configuration parsing, output writing, and terminal visualization/interaction.
+`python`, `maze`, `maze-generator`, `maze-solver`, `pathfinding`, `dfs`, `prim-algorithm`, `bfs`, `ascii`, `cli`
 
-### Tools Used
-Current technical tools:
-- Python, Makefile
-- flake8, mypy
-- Git/GitHub
+## Demo Asset
 
-Collaboration/management tools:
-- GitHub
-- Google Drive
-- Slack
-
-## Resources
-Classic references:
-- DFS maze generation background: https://medium.com/@nacerkroudir/randomized-depth-first-search-algorithm-for-maze-generation-fb2d83702742
-- BFS shortest path examples: https://www.kaggle.com/code/mexwell/maze-runner-shortest-path-algorithms
-- ANSI terminal colors: https://en.wikipedia.org/wiki/ANSI_escape_code
-
-- docstring quality/tuning;
-- running bulk test ideas and edge-case checks;
-- final code review support;
-- robustness and improvement suggestions.
-
-AI was **not** used to replace manual project decisions; final design/validation/integration choices were made by the team.
+The repository includes a real terminal demo GIF at `assets/demo.gif`.
